@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ethers, BrowserProvider, Contract } from 'ethers';
+import * as ethers from 'ethers';
 
 // --- CONFIGURATION ---
 // Deployed on Sepolia Testnet - LIVE ADDRESSES
@@ -24,7 +24,7 @@ const ERC4626_ABI = [
 
 export type TxStatus = 'IDLE' | 'CHECKING' | 'APPROVING' | 'STAKING' | 'WITHDRAWING' | 'SIMULATING' | 'SUCCESS' | 'ERROR';
 
-export const useZenith = (provider: BrowserProvider | null, account: string | null) => {
+export const useZenith = (provider: ethers.BrowserProvider | null, account: string | null) => {
   const [status, setStatus] = useState<TxStatus>('IDLE');
   const [error, setError] = useState<string | null>(null);
   
@@ -44,8 +44,8 @@ export const useZenith = (provider: BrowserProvider | null, account: string | nu
           return;
       }
 
-      const token = new Contract(TOKEN_ADDRESS, ERC20_ABI, provider);
-      const vault = new Contract(VAULT_ADDRESS, ERC4626_ABI, provider);
+      const token = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, provider);
+      const vault = new ethers.Contract(VAULT_ADDRESS, ERC4626_ABI, provider);
 
       const [bal, shares, assets, oneShareAssets] = await Promise.all([
         token.balanceOf(account),
@@ -82,8 +82,8 @@ export const useZenith = (provider: BrowserProvider | null, account: string | nu
 
     try {
       const signer = await provider.getSigner();
-      const token = new Contract(TOKEN_ADDRESS, ERC20_ABI, signer);
-      const vault = new Contract(VAULT_ADDRESS, ERC4626_ABI, signer);
+      const token = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, signer);
+      const vault = new ethers.Contract(VAULT_ADDRESS, ERC4626_ABI, signer);
       
       // Ensure we use 18 decimals as per ERC20 standard
       const amount = ethers.parseUnits(amountStr, 18);
@@ -125,7 +125,7 @@ export const useZenith = (provider: BrowserProvider | null, account: string | nu
 
     try {
       const signer = await provider.getSigner();
-      const vault = new Contract(VAULT_ADDRESS, ERC4626_ABI, signer);
+      const vault = new ethers.Contract(VAULT_ADDRESS, ERC4626_ABI, signer);
 
       // 1. Get current shares
       const shares = await vault.balanceOf(account);
@@ -155,8 +155,8 @@ export const useZenith = (provider: BrowserProvider | null, account: string | nu
      setStatus('SIMULATING');
      try {
         const signer = await provider.getSigner();
-        const token = new Contract(TOKEN_ADDRESS, ERC20_ABI, signer);
-        const vault = new Contract(VAULT_ADDRESS, ERC4626_ABI, signer);
+        const token = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, signer);
+        const vault = new ethers.Contract(VAULT_ADDRESS, ERC4626_ABI, signer);
         
         const yieldAmount = ethers.parseEther("1000");
 
