@@ -2,14 +2,28 @@ import { GoogleGenAI } from "@google/genai";
 import { HOPE_TOKEN_SOL, ZENITH_VAULT_SOL } from '../constants/contractCode';
 
 const getClient = () => {
-    // Safe check for process.env to prevent browser crash
     let apiKey = '';
+    
+    // Try process.env (Node/Webpack/React Scripts)
     try {
         if (typeof process !== 'undefined' && process.env) {
             apiKey = process.env.API_KEY || '';
         }
     } catch (e) {
-        console.warn("Environment variable access failed");
+        // Ignore reference errors
+    }
+
+    // Try import.meta.env (Vite/Modern) if process failed
+    if (!apiKey) {
+        try {
+            // @ts-ignore - import.meta might not be typed
+            if (import.meta && import.meta.env) {
+                // @ts-ignore
+                apiKey = import.meta.env.VITE_API_KEY || import.meta.env.API_KEY || '';
+            }
+        } catch (e) {
+             // Ignore
+        }
     }
 
     if (!apiKey) {
