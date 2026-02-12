@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LayoutDashboard, FileCode, Activity } from 'lucide-react';
 import { VaultDashboard } from './components/VaultDashboard';
 import { ContractViewer } from './components/ContractViewer';
@@ -24,6 +24,13 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<NavView>(NavView.DASHBOARD);
   const [account, setAccount] = useState<string | null>(null);
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
 
   return (
     // OLED DARK MODE: bg-black, text-white

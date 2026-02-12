@@ -69,10 +69,10 @@ export const ConnectWallet: React.FC<ConnectWalletProps> = ({ setSigner, setProv
       
       const ethereum = getEthereum();
       if (ethereum) {
-        const provider = new ethers.BrowserProvider(ethereum);
-        if (setProvider) setProvider(provider);
-        
         try {
+            const provider = new ethers.BrowserProvider(ethereum);
+            if (setProvider) setProvider(provider);
+            
             const signer = await provider.getSigner();
             if (setSigner) setSigner(signer);
             

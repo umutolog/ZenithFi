@@ -24,12 +24,17 @@ export const ProtocolStats: React.FC = () => {
   const [provider, setProvider] = useState<ethers.Provider | null>(null);
 
   useEffect(() => {
-      // Prioritize wallet provider if available
-      if (window.ethereum) {
-          setProvider(new ethers.BrowserProvider(window.ethereum));
-      } else {
-          // Fallback to Public RPC with Static Network to avoid detection errors
-          setProvider(new ethers.JsonRpcProvider(SEPOLIA_RPC_URL, SEPOLIA_CHAIN_ID));
+      // Prioritize wallet provider if available, but wrap in try/catch to prevent crashes on load
+      try {
+        if (window.ethereum) {
+            setProvider(new ethers.BrowserProvider(window.ethereum));
+        } else {
+            // Fallback to Public RPC with Static Network to avoid detection errors
+            setProvider(new ethers.JsonRpcProvider(SEPOLIA_RPC_URL, SEPOLIA_CHAIN_ID));
+        }
+      } catch (e) {
+        console.warn("Provider initialization failed, falling back to public RPC", e);
+        setProvider(new ethers.JsonRpcProvider(SEPOLIA_RPC_URL, SEPOLIA_CHAIN_ID));
       }
   }, []);
 
