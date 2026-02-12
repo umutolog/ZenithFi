@@ -2,40 +2,40 @@ import { GoogleGenAI } from "@google/genai";
 import { HOPE_TOKEN_SOL, ZENITH_VAULT_SOL } from '../constants/contractCode';
 
 const getClient = () => {
+    // Attempt to retrieve API key from various environment locations safely
     let apiKey = '';
-    
-    // Try process.env (Node/Webpack/React Scripts)
-    try {
-        if (typeof process !== 'undefined' && process.env) {
-            apiKey = process.env.API_KEY || '';
-        }
-    } catch (e) {
-        // Ignore reference errors
-    }
 
-    // Try import.meta.env (Vite/Modern) if process failed
+    // Check process.env (Node/Webpack)
+    try {
+        // @ts-ignore
+        if (typeof process !== 'undefined' && process?.env?.API_KEY) {
+            // @ts-ignore
+            apiKey = process.env.API_KEY;
+        }
+    } catch (e) {}
+
+    // Check import.meta.env (Vite)
     if (!apiKey) {
         try {
-            // @ts-ignore - import.meta might not be typed
-            if (import.meta && import.meta.env) {
+            // @ts-ignore
+            if (typeof import.meta !== 'undefined' && import.meta.env) {
                 // @ts-ignore
-                apiKey = import.meta.env.VITE_API_KEY || import.meta.env.API_KEY || '';
+                apiKey = import.meta.env.VITE_API_KEY || import.meta.env.API_KEY;
             }
-        } catch (e) {
-             // Ignore
-        }
+        } catch (e) {}
     }
 
     if (!apiKey) {
-        console.warn("API_KEY not found in environment variables");
+        console.warn("API_KEY not found in environment variables. AI features will be disabled.");
         return null;
     }
+
     return new GoogleGenAI({ apiKey });
 }
 
 export const analyzeContracts = async (userQuestion: string): Promise<string> => {
     const ai = getClient();
-    if (!ai) return "Error: API Key missing. Cannot connect to Gemini.";
+    if (!ai) return "Error: API Key missing. Please ensure your environment is configured with API_KEY.";
 
     const systemPrompt = `
     You are the Chief Protocol Architect for HopeFi/Zenith. 
