@@ -24,13 +24,8 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<NavView>(NavView.DASHBOARD);
   const [account, setAccount] = useState<string | null>(null);
   const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) return null;
+  // Removed isMounted check to allow app to render immediately even if hydration is partial
 
   return (
     // OLED DARK MODE: bg-black, text-white

@@ -2,7 +2,16 @@ import { GoogleGenAI } from "@google/genai";
 import { HOPE_TOKEN_SOL, ZENITH_VAULT_SOL } from '../constants/contractCode';
 
 const getClient = () => {
-    const apiKey = process.env.API_KEY;
+    // Safe check for process.env to prevent browser crash
+    let apiKey = '';
+    try {
+        if (typeof process !== 'undefined' && process.env) {
+            apiKey = process.env.API_KEY || '';
+        }
+    } catch (e) {
+        console.warn("Environment variable access failed");
+    }
+
     if (!apiKey) {
         console.warn("API_KEY not found in environment variables");
         return null;

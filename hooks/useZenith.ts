@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import * as ethers from 'ethers';
+import { BrowserProvider, Contract, formatUnits, parseEther, parseUnits, MaxUint256 } from 'ethers';
 
 // --- CONFIGURATION ---
 // Deployed on Sepolia Testnet - LIVE ADDRESSES
@@ -24,7 +24,7 @@ const ERC4626_ABI = [
 
 export type TxStatus = 'IDLE' | 'CHECKING' | 'APPROVING' | 'STAKING' | 'WITHDRAWING' | 'SIMULATING' | 'SUCCESS' | 'ERROR';
 
-export const useZenith = (provider: ethers.BrowserProvider | null, account: string | null) => {
+export const useZenith = (provider: BrowserProvider | null, account: string | null) => {
   const [status, setStatus] = useState<TxStatus>('IDLE');
   const [error, setError] = useState<string | null>(null);
   
@@ -44,24 +44,24 @@ export const useZenith = (provider: ethers.BrowserProvider | null, account: stri
           return;
       }
 
-      const token = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, provider);
-      const vault = new ethers.Contract(VAULT_ADDRESS, ERC4626_ABI, provider);
+      const token = new Contract(TOKEN_ADDRESS, ERC20_ABI, provider);
+      const vault = new Contract(VAULT_ADDRESS, ERC4626_ABI, provider);
 
       const [bal, shares, assets, oneShareAssets] = await Promise.all([
         token.balanceOf(account),
         vault.balanceOf(account), // sZENITH Balance (Shares)
         vault.totalAssets(),
-        vault.convertToAssets(ethers.parseEther("1"))
+        vault.convertToAssets(parseEther("1"))
       ]);
 
       // Convert share balance to underlying asset value for display
       const stakedValue = await vault.convertToAssets(shares);
 
       setData({
-        tokenBalance: ethers.formatUnits(bal, 18),
-        stakedBalance: ethers.formatUnits(stakedValue, 18),
-        sharePrice: ethers.formatUnits(oneShareAssets, 18),
-        tvl: ethers.formatUnits(assets, 18)
+        tokenBalance: formatUnits(bal, 18),
+        stakedBalance: formatUnits(stakedValue, 18),
+        sharePrice: formatUnits(oneShareAssets, 18),
+        tvl: formatUnits(assets, 18)
       });
     } catch (e: any) {
       console.warn("Stats error:", e.message);
@@ -82,18 +82,18 @@ export const useZenith = (provider: ethers.BrowserProvider | null, account: stri
 
     try {
       const signer = await provider.getSigner();
-      const token = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, signer);
-      const vault = new ethers.Contract(VAULT_ADDRESS, ERC4626_ABI, signer);
+      const token = new Contract(TOKEN_ADDRESS, ERC20_ABI, signer);
+      const vault = new Contract(VAULT_ADDRESS, ERC4626_ABI, signer);
       
       // Ensure we use 18 decimals as per ERC20 standard
-      const amount = ethers.parseUnits(amountStr, 18);
+      const amount = parseUnits(amountStr, 18);
 
       // STEP 1: APPROVE
       setStatus('APPROVING');
       const allowance = await token.allowance(account, VAULT_ADDRESS);
       
       if (allowance < amount) {
-          const tx = await token.approve(VAULT_ADDRESS, ethers.MaxUint256);
+          const tx = await token.approve(VAULT_ADDRESS, MaxUint256);
           await tx.wait();
       }
 
@@ -125,7 +125,7 @@ export const useZenith = (provider: ethers.BrowserProvider | null, account: stri
 
     try {
       const signer = await provider.getSigner();
-      const vault = new ethers.Contract(VAULT_ADDRESS, ERC4626_ABI, signer);
+      const vault = new Contract(VAULT_ADDRESS, ERC4626_ABI, signer);
 
       // 1. Get current shares
       const shares = await vault.balanceOf(account);
@@ -155,14 +155,14 @@ export const useZenith = (provider: ethers.BrowserProvider | null, account: stri
      setStatus('SIMULATING');
      try {
         const signer = await provider.getSigner();
-        const token = new ethers.Contract(TOKEN_ADDRESS, ERC20_ABI, signer);
-        const vault = new ethers.Contract(VAULT_ADDRESS, ERC4626_ABI, signer);
+        const token = new Contract(TOKEN_ADDRESS, ERC20_ABI, signer);
+        const vault = new Contract(VAULT_ADDRESS, ERC4626_ABI, signer);
         
-        const yieldAmount = ethers.parseEther("1000");
+        const yieldAmount = parseEther("1000");
 
         const allowance = await token.allowance(account, VAULT_ADDRESS);
         if (allowance < yieldAmount) {
-            const txApprove = await token.approve(VAULT_ADDRESS, ethers.MaxUint256);
+            const txApprove = await token.approve(VAULT_ADDRESS, MaxUint256);
             await txApprove.wait();
         }
 

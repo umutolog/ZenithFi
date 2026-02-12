@@ -10,9 +10,8 @@ const VAULT_ABI = [
   "function convertToAssets(uint256 shares) view returns (uint256)"
 ];
 
-// Public Sepolia RPC & Chain ID
+// Public Sepolia RPC
 const SEPOLIA_RPC_URL = "https://ethereum-sepolia-rpc.publicnode.com";
-const SEPOLIA_CHAIN_ID = 11155111n;
 
 export const ProtocolStats: React.FC = () => {
   const [stats, setStats] = useState({
@@ -29,12 +28,13 @@ export const ProtocolStats: React.FC = () => {
         if (window.ethereum) {
             setProvider(new ethers.BrowserProvider(window.ethereum));
         } else {
-            // Fallback to Public RPC with Static Network to avoid detection errors
-            setProvider(new ethers.JsonRpcProvider(SEPOLIA_RPC_URL, SEPOLIA_CHAIN_ID));
+            // Fallback to Public RPC
+            // Remove the second argument to let ethers detect chain, safer for constructor
+            setProvider(new ethers.JsonRpcProvider(SEPOLIA_RPC_URL));
         }
       } catch (e) {
         console.warn("Provider initialization failed, falling back to public RPC", e);
-        setProvider(new ethers.JsonRpcProvider(SEPOLIA_RPC_URL, SEPOLIA_CHAIN_ID));
+        setProvider(new ethers.JsonRpcProvider(SEPOLIA_RPC_URL));
       }
   }, []);
 

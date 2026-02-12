@@ -11,7 +11,6 @@ const VAULT_ABI = [
 
 // Public Sepolia RPC
 const SEPOLIA_RPC_URL = "https://ethereum-sepolia-rpc.publicnode.com";
-const SEPOLIA_CHAIN_ID = 11155111n;
 
 interface SolvencyShieldProps {
     provider: ethers.BrowserProvider | null;
@@ -33,8 +32,8 @@ export const SolvencyShield: React.FC<SolvencyShieldProps> = ({ provider: wallet
                 if (walletProvider) {
                     activeProvider = walletProvider;
                 } else {
-                    // FIX: Pass network ID to constructor to prevent async detection failure on startup
-                    activeProvider = new ethers.JsonRpcProvider(SEPOLIA_RPC_URL, SEPOLIA_CHAIN_ID);
+                    // FIX: Safer instantiation without explicit chainId check inside constructor
+                    activeProvider = new ethers.JsonRpcProvider(SEPOLIA_RPC_URL);
                 }
 
                 // Safety: Check if contract exists first to avoid errors
